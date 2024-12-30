@@ -1,0 +1,1 @@
+0 1 * * * ~/projects/de/final_project/venv/bin/python3 ~/projects/de/final_project/main.py

@@ -1,0 +1,109 @@
+data_dir: data  # Директория с данными
+archive_dir: archive # Директория с бэкап-данными
+
+tables:
+  # Основные таблицы
+  accounts: info.accounts
+  cards: info.cards
+  clients: info.clients
+
+  # Таблицы для DWH
+  DIM:
+    accounts: public.oled_dwh_dim_accounts_hist
+    cards: public.oled_dwh_dim_cards_hist
+    clients: public.oled_dwh_dim_clients_hist
+    terminals: public.oled_dwh_dim_terminals_hist
+
+  FACT:
+    blacklist: public.oled_dwh_fact_passport_blacklist
+    transactions: public.oled_dwh_fact_transactions
+
+  STG:
+    accounts: public.oled_stg_accounts
+    blacklist: public.oled_stg_blacklist
+    cards: public.oled_stg_cards
+    clients: public.oled_stg_clients
+    terminals: public.oled_stg_terminals
+    transactions: public.oled_stg_transactions
+
+  REP:
+    fraud: public.oled_rep_fraud
+
+  META:
+    meta: public.oled_meta_info
+
+scd2:
+  # Конфигурация для SCD2
+  accounts:
+    mapping:
+      account: account_num
+      valid_to: valid_to
+      client: client
+    stg_pk: account
+    dim_pk: account_num
+    date_col: update_dt
+  cards:
+    mapping:
+      card_num: cards_num
+      account: account_num
+    stg_pk: card_num
+    dim_pk: cards_num
+    date_col: update_dt
+  clients:
+    mapping:
+      client_id: client_id
+      last_name: last_name
+      first_name: first_name
+      patronymic: patronymic
+      date_of_birth: date_of_birth
+      passport_num: passport_num
+      passport_valid_to: passport_valid_to
+      phone: phone
+    stg_pk: client_id
+    dim_pk: client_id
+    date_col: update_dt
+  terminals:
+    mapping:
+      terminal_id: terminal_id
+      terminal_type: terminal_type
+      terminal_city: terminal_city
+      terminal_address: terminal_address
+    stg_pk: terminal_id
+    dim_pk: terminal_id
+    date_col: date
+
+fact_mapping:
+  # Настройка маппинга для сопоставления полей данных.
+  blacklist:
+    passport: passport_num
+    date: entry_dt
+  transactions:
+    transaction_id: trans_id
+    transaction_date: trans_date
+    amount: amt
+    card_num: card_num
+    oper_type: oper_type
+    oper_result: oper_result
+    terminal: terminal
+
+patterns:
+  # Регулярные выражения для поиска файлов
+  transactions: "transactions_(\\d{2})(\\d{2})(\\d{4}).txt"
+  blacklist: "passport_blacklist_(\\d{2})(\\d{2})(\\d{4}).xlsx"
+  terminals: "terminals_(\\d{2})(\\d{2})(\\d{4}).xlsx"
+
+preprocess:
+  # Конфигурации для обработки данных
+  transactions:
+    numeric_cols:
+      - amount
+    rm_cols:
+      - source_path
+  terminals:
+    add_cols:
+      - date
+    rm_cols:
+      - source_path
+  blacklist:
+    rm_cols:
+      - source_path
